@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Urban AI | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="script.js"></script>
+</head>
+
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+
+    <div class="glass p-10 rounded-2xl shadow-2xl w-96 text-center">
+        <h1 class="text-3xl font-bold mb-6">Login</h1>
+
+        <input type="text" id="loginUser" placeholder="Username" class="w-full p-3 mb-4 rounded-lg bg-slate-700">
+        <input type="password" id="loginPass" placeholder="Password" class="w-full p-3 mb-4 rounded-lg bg-slate-700">
+
+        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg mb-3">
+            Login
+        </button>
+
+        <p class="text-gray-300">Don't have an account?
+            <a href="register.html" class="text-green-400 underline">Register</a>
+        </p>
+
+        <div id="loginMsg" class="mt-4 text-red-500"></div>
+    </div>
+
+    <script>
+        function login() {
+            let user = document.getElementById("loginUser").value;
+            let pass = document.getElementById("loginPass").value;
+
+            let storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+
+            let found = storedUsers.find(u => u.username === user && u.password === pass);
+
+            if (found) {
+                localStorage.setItem("currentUser", user);
+                window.location.href = "complaint.html";
+            } else {
+                document.getElementById("loginMsg").innerText = "⚠️ Invalid username or password!";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

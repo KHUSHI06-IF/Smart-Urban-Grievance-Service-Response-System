@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Urban AI | Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="script.js"></script>
+</head>
+
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+
+    <div class="glass p-10 rounded-2xl shadow-2xl w-96 text-center">
+        <h1 class="text-3xl font-bold mb-6">Register</h1>
+
+        <input type="text" id="regUser" placeholder="Username" class="w-full p-3 mb-4 rounded-lg bg-slate-700">
+        <input type="password" id="regPass" placeholder="Password" class="w-full p-3 mb-4 rounded-lg bg-slate-700">
+
+        <button onclick="register()" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg mb-3">
+            Register
+        </button>
+
+        <p class="text-gray-300">Already have an account?
+            <a href="login.html" class="text-blue-400 underline">Login</a>
+        </p>
+
+        <div id="regMsg" class="mt-4 text-green-400"></div>
+    </div>
+
+    <script>
+        function register() {
+            let user = document.getElementById("regUser").value;
+            let pass = document.getElementById("regPass").value;
+
+            if (!user || !pass) {
+                document.getElementById("regMsg").innerText = "⚠️ Fill all fields!";
+                return;
+            }
+
+            let storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+
+            if (storedUsers.find(u => u.username === user)) {
+                document.getElementById("regMsg").innerText = "⚠️ Username already exists!";
+                return;
+            }
+
+            storedUsers.push({ username: user, password: pass });
+            localStorage.setItem("users", JSON.stringify(storedUsers));
+            document.getElementById("regMsg").innerText = "✅ Registration successful! Redirecting...";
+
+            setTimeout(() => { window.location.href = "login.html"; }, 1500);
+        }
+    </script>
+
+</body>
+
+</html>
