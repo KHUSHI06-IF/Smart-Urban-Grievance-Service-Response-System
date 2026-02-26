@@ -3,177 +3,87 @@
 
 <head>
     <meta charset="UTF-8">
+    <title>CivicCare - Smart Complaint System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UrbanCare | Smart City Governance</title>
-    <!-- Using Google Fonts for that clean Tech look -->
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- FIXED NAVBAR -->
-    <header>
-        <div class="logo">Urban<span>Care</span></div>
-        <nav class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#process">Process</a>
-            <a href="#services">Departments</a>
-            <a href="#dashboard">Live Map</a>
-        </nav>
-        <div class="header-actions">
-            <select id="language">
-                <option value="en">EN</option>
-                <option value="hi">HI</option>
-                <option value="mr">MR</option>
-            </select>
-            <button id="loginBtn" class="btn-secondary">Login</button>
-            <button id="registerBtn" class="btn-primary">Get Started</button>
-        </div>
-    </header>
-
-    <main>
-        <!-- HERO SECTION -->
-        <section id="home" class="home">
-            <div class="hero-content">
-                <div class="badge">v2.0 Network Active</div>
-                <h1>Smart Infrastructure <br><span>Grievance Portal</span></h1>
-                <p>Report civic issues with AI-powered tracking. We connect citizens directly to city command centers
-                    for rapid resolution.</p>
-                <div class="home-buttons">
-                    <button class="btn-primary" onclick="openServicePopup('file')">File Complaint</button>
-                    <button class="btn-outline" onclick="scrollToSection('track')">View Live Feed</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- LIVE STATUS BAR -->
-        <div class="status-bar">
-            <div class="status-item"><span class="dot"></span> 1,240 Issues Resolved Today</div>
-            <div class="status-item"><span class="dot"></span> Avg. Response: 4.2 hrs</div>
-        </div>
-
-        <!-- PROCESS SECTION -->
-        <section id="process" class="section">
-            <div class="section-header">
-                <h2>System Workflow</h2>
-                <p>A 3-step transparent protocol for city maintenance.</p>
-            </div>
-            <div class="steps">
-                <div class="step-card">
-                    <div class="icon">📸</div>
-                    <h3>Capture</h3>
-                    <p>Upload geo-tagged photos of the issue.</p>
-                </div>
-                <div class="step-card">
-                    <div class="icon">⚡</div>
-                    <h3>Process</h3>
-                    <p>AI routes the ticket to the correct department.</p>
-                </div>
-                <div class="step-card">
-                    <div class="icon">✅</div>
-                    <h3>Resolve</h3>
-                    <p>Get real-time updates until the fix is verified.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- DEPARTMENTS GRID -->
-        <section id="services" class="section gray-bg">
-            <div class="section-header">
-                <h2>Active Departments</h2>
-                <p>Select a category to initiate a service request.</p>
-            </div>
-            <div class="service-cards">
-                <div class="card" onclick="openServicePopup('water')">
-                    <div class="card-icon">💧</div>
-                    <span>Water Supply</span>
-                </div>
-                <div class="card" onclick="openServicePopup('roads')">
-                    <div class="card-icon">🛣️</div>
-                    <span>Road & Potholes</span>
-                </div>
-                <div class="card" onclick="openServicePopup('garbage')">
-                    <div class="card-icon">♻️</div>
-                    <span>Waste Mgmt</span>
-                </div>
-                <div class="card" onclick="openServicePopup('electricity')">
-                    <div class="card-icon">⚡</div>
-                    <span>Street Lights</span>
-                </div>
-                <div class="card" onclick="openServicePopup('publicworks')">
-                    <div class="card-icon">🏗️</div>
-                    <span>Public Works</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- DASHBOARD SECTION -->
-        <section id="dashboard" class="section">
-            <div class="section-header">
-                <h2>Analytics Dashboard</h2>
-            </div>
-            <div class="stats">
-                <div class="stat-card">
-                    <span id="totalComplaints">8,240</span>
-                    <p>Total Submissions</p>
-                </div>
-                <div class="stat-card">
-                    <span id="inProgress" style="color: #fbbf24;">420</span>
-                    <p>In Remediation</p>
-                </div>
-                <div class="stat-card">
-                    <span id="resolved" style="color: #10b981;">7,820</span>
-                    <p>Closed Cases</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- FOOTER -->
-    <footer>
-        <div class="footer-grid">
-            <div class="footer-col">
-                <div class="logo">UrbanCare</div>
-                <p>Building resilient cities through technology.</p>
-            </div>
-            <div class="footer-col">
-                <h4>Support</h4>
-                <a href="#">Help Center</a>
-                <a href="#">API Docs</a>
-            </div>
-            <div class="footer-col">
-                <h4>Legal</h4>
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            &copy; 2026 UrbanCare Intelligence Systems.
-        </div>
-    </footer>
-
-    <!-- POPUPS (Keep your existing IDs for JS functionality) -->
-    <div id="servicePopup" class="popup">
-        <div class="popup-content">
-            <span class="close" onclick="closeServicePopup()">&times;</span>
-            <h3 id="popupTitle">Submit Report</h3>
-            <form id="serviceForm">
-                <div class="form-group">
-                    <input type="text" placeholder="Full Name" required>
-                    <input type="text" placeholder="Location Coordinates / Address" required>
-                </div>
-                <textarea placeholder="Describe the situation in detail..." rows="4" required></textarea>
-                <div class="file-upload">
-                    <label for="file">Attach Photo (Optional)</label>
-                    <input type="file" id="file">
-                </div>
-                <button type="submit" class="btn-primary">Dispatch Request</button>
-            </form>
-        </div>
+    <!-- Floating Background Shapes -->
+    <div class="bg-shapes">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
     </div>
 
-    <script src="script.js"></script>
+    <header id="navbar">
+        <div class="logo">CivicCare</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Departments</a>
+            <a href="#">Login</a>
+            <a href="#">aboutus</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content reveal">
+            <h2 class="gradient-text">Transform Your City With One Click</h2>
+            <p>Report civic issues instantly. Track progress in real-time. Build a smarter community.</p>
+            <div class="hero-buttons">
+                <button class="btn btn-secondary">🔐 Login</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2 class="reveal">How It Works</h2>
+        <div class="cards">
+            <div class="card reveal">
+                <h3>1️⃣ Report</h3>
+                <p>Select issue type, upload photo, and submit in seconds.</p>
+            </div>
+            <div class="card reveal">
+                <h3>2️⃣ Track</h3>
+                <p>Monitor real-time progress with status updates.</p>
+            </div>
+            <div class="card reveal">
+                <h3>3️⃣ Resolve</h3>
+                <p>Authorities fix the issue and update resolution proof.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 CivicCare | Smart Governance Platform</p>
+    </footer>
+
+    <script>
+        /* Navbar Glow on Scroll */
+        window.addEventListener("scroll", function () {
+            const nav = document.getElementById("navbar");
+            nav.classList.toggle("scrolled", window.scrollY > 50);
+        });
+
+        /* Scroll Reveal Animation */
+        const reveals = document.querySelectorAll(".reveal");
+
+        window.addEventListener("scroll", () => {
+            reveals.forEach(el => {
+                const windowHeight = window.innerHeight;
+                const revealTop = el.getBoundingClientRect().top;
+                if (revealTop < windowHeight - 100) {
+                    el.classList.add("active");
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>
