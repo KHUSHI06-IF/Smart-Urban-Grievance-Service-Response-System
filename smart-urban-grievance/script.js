@@ -1,120 +1,106 @@
-/* ===== UrbanCare Core Logic ===== */
-
-// 1. Smooth Scrolling for Navigation
-function scrollToSection(id) {
-    const element = document.getElementById(id);
-    if (element) {
-        window.scrollTo({
-            top: element.offsetTop - 80, // Offset for fixed header
-            behavior: 'smooth'
-        });
-    }
+// --- Show Sections ---
+function showSection(section) {
+    document.querySelectorAll("div[id]").forEach(div => div.classList.add("hidden"));
+    document.getElementById(section).classList.remove("hidden");
 }
 
-// 2. Optimized Popup Management
-const popups = {
-    login: document.getElementById('loginPopup'),
-    register: document.getElementById('registerPopup'),
-    service: document.getElementById('servicePopup')
-};
+// --- Logout ---
+function logout() {
+    window.location.href = "login.html";
+}
 
-// Open functions
-document.getElementById('loginBtn').onclick = () => popups.login.style.display = 'block';
-document.getElementById('registerBtn').onclick = () => popups.register.style.display = 'block';
+// --- Complaint Storage ---
+let complaints = JSON.parse(localStorage.getItem("complaints") || "[]");
 
-function openServicePopup(type) {
-    const title = document.getElementById('popupTitle');
-    const typeMap = {
-        'file': 'File New Complaint',
-        'track': 'Track Existing Request',
-        'water': 'Water Supply Issue',
-        'roads': 'Road & Pothole Report',
-        'garbage': 'Waste Management Request',
-        'electricity': 'Street Light/Power Issue',
-        'publicworks': 'Public Works Department'
+// --- Add Complaint ---
+function addComplaint() {
+    let title = document.getElementById("title").value;
+    let desc = document.getElementById("desc").value;
+    let category = document.getElementById("category").value;
+
+    if (!title || !desc) {
+        alert("Please fill all fields!");
+        return;
+    }
+
+    let id = complaints.length + 1;
+
+    let newComplaint = {
+        id: id,
+        title: title,
+        desc: desc,
+        category: category,
+        status: "Submitted",
+        timeline: [
+            { text: "Complaint Submitted", time: new Date().toLocaleString() }
+        ]
     };
 
-    title.innerText = typeMap[type] || 'Service Request';
-    popups.service.style.display = 'block';
+    complaints.push(newComplaint);
+    localStorage.setItem("complaints", JSON.stringify(complaints));
+
+    alert("Complaint Submitted Successfully! Your ID: " + id);
+    showSection("list");
+    loadComplaints();
 }
 
-// Universal Close Functions
-function closeAllPopups() {
-    Object.values(popups).forEach(p => { if (p) p.style.display = 'none'; });
-}
+// --- Load Complaints List ---
+function loadComplaints() {
+    let list = document.getElementById("complaintList");
+    list.innerHTML = "";
 
-// Global Click listener (Close on overlay click)
-window.onclick = (e) => {
-    if (Object.values(popups).includes(e.target)) closeAllPopups();
-};
+    complaints.forEach(c => {
+        let box = document.createElement("div");
+        box.className = "p-4 bg-white rounded shadow";
 
-// Manual close buttons (X)
-function closeServicePopup() { popups.service.style.display = 'none'; }
-function closeLoginPopup() { popups.login.style.display = 'none'; }
-function closeRegisterPopup() { popups.register.style.display = 'none'; }
-
-// 3. Language & Form Handling
-document.getElementById('language').addEventListener('change', function () {
-    console.log('Locale changed to:', this.value);
-    // Add logic here to reload content based on JSON lang files
-});
-
-document.getElementById('serviceForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    // Simulate API Call
-    const btn = e.target.querySelector('button');
-    btn.innerText = "Dispatching...";
-    setTimeout(() => {
-        alert('Ticket Generated Successfully! Redirecting to Tracking...');
-        btn.innerText = "Submit Complaint";
-        closeServicePopup();
-    }, 1500);
-});
-
-// 4. Data Engine (Complaints & Stats)
-const complaints = [
-    { id: 'UC-9901', category: 'Water', title: 'Main pipe leakage', status: 'pending', date: '2026-02-25' },
-    { id: 'UC-9902', category: 'Roads', title: 'Severe pothole', status: 'inprogress', date: '2026-02-24' },
-    { id: 'UC-9903', category: 'Garbage', title: 'Missed collection', status: 'resolved', date: '2026-02-23' }
-];
-
-function filterComplaints(status) {
-    const list = document.getElementById('complaintList');
-    if (!list) return; // Guard clause if element doesn't exist
-
-    list.innerHTML = '';
-    const filtered = complaints.filter(c => status === 'all' || c.status === status);
-
-    filtered.forEach(c => {
-        const div = document.createElement('div');
-        div.className = `complaint-card status-${c.status}`;
-        div.innerHTML = `
-            <div class="card-header">
-                <span class="ticket-id">${c.id}</span>
-                <span class="badge-${c.status}">${c.status.toUpperCase()}</span>
-            </div>
-            <h4>${c.title}</h4>
-            <p>${c.category} • ${c.date}</p>
+        box.innerHTML = `
+            <h3 class="font-bold text-lg">${c.title}</h3>
+            <p>${c.desc}</p>
+            <p class="text-sm text-gray-500">Category: ${c.category}</p>
+            <p class="text-sm font-bold mt-2">Status: ${c.status}</p>
+            <button onclick="trackFromList(${c.id})"
+                class="mt-3 bg-green-600 text-white px-4 py-1 rounded">
+                Track
+            </button>
         `;
-        list.appendChild(div);
+
+        list.appendChild(box);
+    });
+
+    document.getElementById("totalCount").innerText = complaints.length;
+}
+
+loadComplaints();
+
+// --- Track Complaint from List ---
+function trackFromList(id) {
+    showSection("track");
+    document.getElementById("trackID").value = id;
+    trackComplaint();
+}
+
+// --- Track Complaint ---
+function trackComplaint() {
+    let id = document.getElementById("trackID").value;
+    let comp = complaints.find(c => c.id == id);
+
+    let timeline = document.getElementById("timeline");
+    timeline.innerHTML = "";
+
+    if (!comp) {
+        timeline.innerHTML = `<p class="text-red-600 font-bold">Complaint Not Found!</p>`;
+        return;
+    }
+
+    comp.timeline.forEach(t => {
+        let step = document.createElement("div");
+        step.className = "bg-blue-100 p-4 rounded shadow w-56 text-center";
+
+        step.innerHTML = `
+            <h3 class="font-bold">${t.text}</h3>
+            <p class="text-sm text-gray-600">${t.time}</p>
+        `;
+
+        timeline.appendChild(step);
     });
 }
-
-// 5. Dashboard Initialization
-function initDashboard() {
-    const stats = {
-        total: complaints.length,
-        pending: complaints.filter(c => c.status === 'pending').length,
-        resolved: complaints.filter(c => c.status === 'resolved').length
-    };
-
-    document.getElementById('totalComplaints').innerText = stats.total;
-    document.getElementById('inProgress').innerText = stats.pending;
-    document.getElementById('resolved').innerText = stats.resolved;
-}
-
-// Initial Run
-window.onload = () => {
-    filterComplaints('all');
-    initDashboard();
-};

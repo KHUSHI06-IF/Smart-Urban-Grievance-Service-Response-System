@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Urban AI | Departments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center">
+
+    <!-- Navbar -->
+    <nav class="w-full bg-slate-800 p-4 flex justify-between items-center shadow-lg fixed top-0 z-50">
+        <h1 class="text-2xl font-bold text-blue-400">SmartUrban</h1>
+        <div>
+            <a href="index.html" class="mr-6 hover:text-blue-400 transition">Home</a>
+            <a href="how-it-works.html" class="mr-6 hover:text-blue-400 transition">How It Works</a>
+            <a href="departments.html" class="mr-6 hover:text-blue-400 transition font-semibold">Departments</a>
+            <a href="track.html" class="mr-6 hover:text-blue-400 transition">Track</a>
+            <a href="login.html" class="hover:text-blue-400 transition">Login</a>
+        </div>
+    </nav>
+
+    <!-- Main Section -->
+    <main class="mt-24 w-11/12 max-w-6xl">
+
+        <h2 class="text-4xl font-bold text-center text-blue-400 mb-12">Supported Departments</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+
+            <!-- Water Supply -->
+            <div onclick="openModal('waterModal')"
+                class="card bg-slate-800/60 backdrop-blur-lg p-8 rounded-2xl shadow-xl transition transform hover:scale-105 cursor-pointer">
+                <h3 class="text-2xl font-bold mb-4">💧 Water Supply</h3>
+                <p class="text-gray-300">Report water leakage, supply issues, and pipeline damage.</p>
+            </div>
+
+            <!-- Roads -->
+            <div onclick="openModal('roadsModal')"
+                class="card bg-slate-800/60 backdrop-blur-lg p-8 rounded-2xl shadow-xl transition transform hover:scale-105 cursor-pointer">
+                <h3 class="text-2xl font-bold mb-4">🛣 Roads</h3>
+                <p class="text-gray-300">Report potholes, road damage, and street infrastructure issues.</p>
+            </div>
+
+            <!-- Garbage -->
+            <div onclick="openModal('garbageModal')"
+                class="card bg-slate-800/60 backdrop-blur-lg p-8 rounded-2xl shadow-xl transition transform hover:scale-105 cursor-pointer">
+                <h3 class="text-2xl font-bold mb-4">🗑 Garbage</h3>
+                <p class="text-gray-300">Garbage collection delays and sanitation complaints.</p>
+            </div>
+
+            <!-- Electricity -->
+            <div onclick="openModal('electricityModal')"
+                class="card bg-slate-800/60 backdrop-blur-lg p-8 rounded-2xl shadow-xl transition transform hover:scale-105 cursor-pointer">
+                <h3 class="text-2xl font-bold mb-4">⚡ Electricity</h3>
+                <p class="text-gray-300">Street light failures and electricity-related issues.</p>
+            </div>
+
+            <!-- Public Works -->
+            <div onclick="openModal('publicModal')"
+                class="card bg-slate-800/60 backdrop-blur-lg p-8 rounded-2xl shadow-xl transition transform hover:scale-105 cursor-pointer">
+                <h3 class="text-2xl font-bold mb-4">🏢 Public Works</h3>
+                <p class="text-gray-300">Public property maintenance and civic infrastructure problems.</p>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 w-full bg-slate-800 p-6 text-center text-gray-400">
+        &copy; 2026 Smart Urban Grievance. All Rights Reserved.
+    </footer>
+
+    <!-- Modals -->
+    <!-- Water Supply Modal -->
+    <div id="waterModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-900 p-8 rounded-2xl w-11/12 max-w-md relative">
+            <button onclick="closeModal('waterModal')"
+                class="absolute top-4 right-4 text-red-500 text-xl">&times;</button>
+            <h3 class="text-2xl font-bold mb-4">💧 Water Supply Complaint</h3>
+            <form class="flex flex-col gap-4">
+                <input type="text" placeholder="Issue Title" class="p-2 rounded bg-slate-800 text-white">
+                <textarea placeholder="Describe your issue" class="p-2 rounded bg-slate-800 text-white"></textarea>
+                <button type="submit"
+                    class="bg-blue-400 text-slate-900 font-bold py-2 rounded hover:bg-blue-500 transition">Submit
+                    Complaint</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Roads Modal -->
+    <div id="roadsModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-900 p-8 rounded-2xl w-11/12 max-w-md relative">
+            <button onclick="closeModal('roadsModal')"
+                class="absolute top-4 right-4 text-red-500 text-xl">&times;</button>
+            <h3 class="text-2xl font-bold mb-4">🛣 Roads Complaint</h3>
+            <form class="flex flex-col gap-4">
+                <input type="text" placeholder="Issue Title" class="p-2 rounded bg-slate-800 text-white">
+                <textarea placeholder="Describe your issue" class="p-2 rounded bg-slate-800 text-white"></textarea>
+                <button type="submit"
+                    class="bg-blue-400 text-slate-900 font-bold py-2 rounded hover:bg-blue-500 transition">Submit
+                    Complaint</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Garbage Modal -->
+    <div id="garbageModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-900 p-8 rounded-2xl w-11/12 max-w-md relative">
+            <button onclick="closeModal('garbageModal')"
+                class="absolute top-4 right-4 text-red-500 text-xl">&times;</button>
+            <h3 class="text-2xl font-bold mb-4">🗑 Garbage Complaint</h3>
+            <form class="flex flex-col gap-4">
+                <input type="text" placeholder="Issue Title" class="p-2 rounded bg-slate-800 text-white">
+                <textarea placeholder="Describe your issue" class="p-2 rounded bg-slate-800 text-white"></textarea>
+                <button type="submit"
+                    class="bg-blue-400 text-slate-900 font-bold py-2 rounded hover:bg-blue-500 transition">Submit
+                    Complaint</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Electricity Modal -->
+    <div id="electricityModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-900 p-8 rounded-2xl w-11/12 max-w-md relative">
+            <button onclick="closeModal('electricityModal')"
+                class="absolute top-4 right-4 text-red-500 text-xl">&times;</button>
+            <h3 class="text-2xl font-bold mb-4">⚡ Electricity Complaint</h3>
+            <form class="flex flex-col gap-4">
+                <input type="text" placeholder="Issue Title" class="p-2 rounded bg-slate-800 text-white">
+                <textarea placeholder="Describe your issue" class="p-2 rounded bg-slate-800 text-white"></textarea>
+                <button type="submit"
+                    class="bg-blue-400 text-slate-900 font-bold py-2 rounded hover:bg-blue-500 transition">Submit
+                    Complaint</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Public Works Modal -->
+    <div id="publicModal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-900 p-8 rounded-2xl w-11/12 max-w-md relative">
+            <button onclick="closeModal('publicModal')"
+                class="absolute top-4 right-4 text-red-500 text-xl">&times;</button>
+            <h3 class="text-2xl font-bold mb-4">🏢 Public Works Complaint</h3>
+            <form class="flex flex-col gap-4">
+                <input type="text" placeholder="Issue Title" class="p-2 rounded bg-slate-800 text-white">
+                <textarea placeholder="Describe your issue" class="p-2 rounded bg-slate-800 text-white"></textarea>
+                <button type="submit"
+                    class="bg-blue-400 text-slate-900 font-bold py-2 rounded hover:bg-blue-500 transition">Submit
+                    Complaint</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS for Modal -->
+    <script>
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
+
+</body>
+
+</html>

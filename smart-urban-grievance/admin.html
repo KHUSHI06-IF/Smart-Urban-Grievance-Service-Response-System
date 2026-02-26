@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Smart Urban Grievance System</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #00e5ff;
+            /* Cyan Tech Accent */
+            --primary-light: rgba(0, 229, 255, 0.15);
+            --secondary: #10b981;
+            --secondary-light: #d1fae5;
+            --accent: #1e88e5;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #0ea5e9;
+            --bg-body: radial-gradient(circle at 20% 20%, #1e88e5, #0d47a1 40%, #000428 100%);
+            --bg-card: rgba(255, 255, 255, 0.08);
+            --bg-sidebar: rgba(0, 4, 40, 0.8);
+            --text-main: #ffffff;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --sidebar-width: 260px;
+            --header-h: 70px;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --radius-md: 20px;
+            --radius-lg: 30px;
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --shadow-lg: 0 20px 60px rgba(0, 229, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* --- Auth Overlay --- */
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 229, 255, 0.3);
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .auth-card h1 {
+            color: #fff;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .auth-card p {
+            color: #e2e8f0;
+            /* Lighter white for better contrast on blue */
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-md);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius-md);
+            background: var(--primary);
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-login:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        /* --- Main Layout --- */
+        #admin-panel {
+            display: none;
+            /* Shown after login */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        /* --- Sidebar --- */
+        aside {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            height: var(--header-h);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            padding: 1.5rem 0.75rem;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            color: #94a3b8;
+            text-decoration: none;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: var(--primary);
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* --- Top Bar --- */
+        header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            height: var(--header-h);
+            background: rgba(0, 4, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 900;
+            transition: left 0.3s ease;
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.6rem 1.25rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notification-btn {
+            position: relative;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .notification-btn:hover {
+            background: var(--bg-body);
+        }
+
+        .notification-btn::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 50px;
+            transition: background 0.2s;
+        }
+
+        .user-profile:hover {
+            background: var(--bg-body);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .user-info .name {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .user-info .role {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+
+        /* --- Main Content --- */
+        main {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-h);
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        .page-title {
+            margin-bottom: 2rem;
+        }
+
+        .page-title h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .page-title p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* --- Sections --- */
+        .page-section {
+            display: none;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Grid & Cards --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.primary {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .stat-icon.warning {
+            background: #fffbeb;
+            color: var(--warning);
+        }
+
+        .stat-icon.secondary {
+            background: var(--secondary-light);
+            color: var(--secondary);
+        }
+
+        .stat-icon.danger {
+            background: #fef2f2;
+            color: var(--danger);
+        }
+
+        .stat-info h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .stat-info p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(15px);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* --- Tables --- */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 1rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--primary);
+            /* High contrast for headers */
+            letter-spacing: 1px;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 1rem;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--bg-body);
+        }
+
+        /* --- Badges --- */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: #fff7ed;
+            color: #9a3412;
+        }
+
+        .badge-progress {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        .badge-resolved {
+            background: #ecfdf5;
+            color: #065f46;
+        }
+
+        .badge-escalated {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .badge-high {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+        }
+
+        .badge-medium {
+            background: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fef3c7;
+        }
+
+        .badge-low {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #dcfce7;
+        }
+
+        /* --- Forms --- */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-select,
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
+            outline: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-select:focus,
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+            background: #fff;
+        }
+
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-body);
+            color: var(--text-main);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        /* --- Filters --- */
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Charts UI --- */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* --- Detail Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            background: #fff;
+            width: 100%;
+            max-width: 800px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-close {
+            background: var(--bg-body);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .modal-content {
+            padding: 2rem;
+        }
+
+        .complaint-view-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .complaint-img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            height: 250px;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+
+        /* --- Settings Toggle --- */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        /* --- Animations --- */
+        .fade-out {
+            transform: translateY(-100%) !important;
+            opacity: 0;
+        }
+
+        .fade-in-ui {
+            opacity: 1 !important;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+        }
+
+        table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .form-select,
+        .form-control {
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- --- Login Overlay --- -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div
+                    style="width: 60px; height: 60px; background: var(--primary); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                    <i class="fas fa-city" style="color: #fff; font-size: 1.8rem;"></i>
+                </div>
+                <h1>UrbanCare Admin</h1>
+                <p>Smart Grievance Response System</p>
+            </div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" class="form-input" placeholder="admin@city.gov" required
+                        value="admin@smartcity.gov">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" class="form-input" placeholder="••••••••" required value="password123">
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                    <label
+                        style="display: flex; align-items: center; gap: 8px; color: #fff; font-size: 0.85rem; cursor: pointer;">
+                        <input type="checkbox" checked> Remember me
+                    </label>
+                    <a href="#"
+                        style="color: #60a5fa; font-size: 0.85rem; text-decoration: none; font-weight: 500;">Forgot
+                        Password?</a>
+                </div>
+                <button type="submit" class="btn-login">Secure Login</button>
+            </form>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <p style="font-size: 0.85rem;">Role-based access: <strong>Super Admin</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- Admin Panel Layout --- -->
+    <div id="admin-panel">
+
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-halved"></i>
+                    <span>UrbanCare</span>
+                </div>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item active" data-target="dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item" data-target="complaints">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Complaints</span>
+                </div>
+                <div class="menu-item" data-target="departments">
+                    <i class="fas fa-building"></i>
+                    <span>Departments</span>
+                </div>
+                <div class="menu-item" data-target="users">
+                    <i class="fas fa-users"></i>
+                    <span>User Management</span>
+                </div>
+                <div class="menu-item" data-target="reports">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Reports & Analytics</span>
+                </div>
+                <div class="menu-item" data-target="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>System Settings</span>
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="menu-item" id="logout-btn" style="color: var(--danger);">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Top Bar -->
+        <header>
+            <div class="search-bar">
+                <i class="fas fa-search" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Search complaints, users, or departments...">
+            </div>
+            <div class="header-actions">
+                <div class="notification-btn">
+                    <i class="far fa-bell fa-lg"></i>
+                </div>
+                <div class="user-profile" id="profile-trigger">
+                    <div class="avatar">SA</div>
+                    <div class="user-info">
+                        <span class="name">Super Admin</span>
+                        <span class="role">City Commissioner</span>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size: 0.7rem; color: var(--text-muted);"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="page-section active">
+                <div class="page-title">
+                    <h2>Dashboard Overview</h2>
+                    <p>Welcome back, Admin. Here is what's happening today.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary"><i class="fas fa-folder"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-total">1,284</h3>
+                            <p>Total Complaints</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning"><i class="fas fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-pending">142</h3>
+                            <p>Pending Review</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon secondary"><i class="fas fa-check-double"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-resolved">942</h3>
+                            <p>Successfully Resolved</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-escalated">56</h3>
+                            <p>SLA Escalated</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Complaints Trend</h4>
+                            <div class="btn-group">
+                                <button class="btn btn-outline"
+                                    style="padding: 4px 10px; font-size: 0.75rem;">Weekly</button>
+                                <button class="btn btn-primary"
+                                    style="padding: 4px 10px; font-size: 0.75rem;">Monthly</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Department Distribution</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="deptChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Recent Complaints</h4>
+                        <button class="btn btn-outline" onclick="switchSection('complaints')">View All</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Citizen</th>
+                                    <th>Department</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-complaints-table">
+                                <!-- JS injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Complaints Section -->
+            <section id="complaints" class="page-section">
+                <div class="page-title">
+                    <h2>Complaint Management</h2>
+                    <p>Track and manage urban grievances across all departments.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="filter-section">
+                            <select class="form-select" style="width: 150px;">
+                                <option>All Status</option>
+                                <option>Pending</option>
+                                <option>In Progress</option>
+                                <option>Resolved</option>
+                                <option>Escalated</option>
+                            </select>
+                            <select class="form-select" style="width: 180px;">
+                                <option>All Departments</option>
+                                <option>Roads & Transport</option>
+                                <option>Water Supply</option>
+                                <option>Sanitation</option>
+                                <option>Electricity</option>
+                            </select>
+                            <input type="date" class="form-control" style="width: 150px;">
+                            <button class="btn btn-primary"><i class="fas fa-filter"></i> Apply Filters</button>
+                            <button class="btn btn-outline"><i class="fas fa-download"></i> Export</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Complaint ID</th>
+                                    <th>Citizen Name</th>
+                                    <th>Department</th>
+                                    <th>Area/Ward</th>
+                                    <th>Date</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-complaints-table">
+                                <!-- JS injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Departments Section -->
+            <section id="departments" class="page-section">
+                <div class="page-title" style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <h2>Department Management</h2>
+                        <p>Configure municipal departments and assign administrators.</p>
+                    </div>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> Add Department</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3>12</h3>
+                            <p>Active Departments</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3>48h</h3>
+                            <p>Avg. SLA Target</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <h3>92%</h3>
+                            <p>Response Rate</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Department Name</th>
+                                    <th>Admin Assigned</th>
+                                    <th>Active Complaints</th>
+                                    <th>Total Resolved</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dept-table">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Management Section -->
+            <section id="users" class="page-section">
+                <div class="page-title">
+                    <h2>Citizen Management</h2>
+                    <p>Database of registered citizens and their engagement history.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="search-bar" style="margin: 0; max-width: 300px;">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Find user by name or ID...">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Joined Date</th>
+                                    <th>Complaints</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="page-section">
+                <div class="page-title">
+                    <h2>Reports & Analytics</h2>
+                    <p>Data-driven insights into city performance and service response.</p>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Monthly Performance Summary</h4>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="height: 400px;">
+                                <canvas id="reportChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>SLA Violation Insights</h4>
+                        </div>
+                        <div class="card-body">
+                            <ul style="list-style: none;">
+                                <li
+                                    style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="font-weight: 600;">Road Repairs</span>
+                                        <span style="color: var(--danger); font-weight: 700;">18%</span>
+                                    </div>
+                                    <div
+                                        style="width: 100%; height: 8px; background: var(--bg-body); border-radius: 4px;">
+                                        <div
+                                            style="width: 18%; height: 100%; background: var(--danger); border-radius: 4px;">
+                                        </div>
+                                    </div>
+                                </li>
+                                <li
+                                    style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="font-weight: 600;">Water Leakage</span>
+                                        <span style="color: var(--warning); font-weight: 700;">12%</span>
+                                    </div>
+                                    <div
+                                        style="width: 100%; height: 8px; background: var(--bg-body); border-radius: 4px;">
+                                        <div
+                                            style="width: 12%; height: 100%; background: var(--warning); border-radius: 4px;">
+                                        </div>
+                                    </div>
+                                </li>
+                                <li
+                                    style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="font-weight: 600;">Street Lighting</span>
+                                        <span style="color: var(--secondary); font-weight: 700;">4%</span>
+                                    </div>
+                                    <div
+                                        style="width: 100%; height: 8px; background: var(--bg-body); border-radius: 4px;">
+                                        <div
+                                            style="width: 4%; height: 100%; background: var(--secondary); border-radius: 4px;">
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div
+                                style="margin-top: 1rem; padding: 1rem; background: var(--primary-light); border-radius: var(--radius-md); color: var(--primary);">
+                                <i class="fas fa-lightbulb"></i> <small>Optimization tip: Allocate more resources to the
+                                    Road Maintenance unit to reduce SLA breaches by 5-8%.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="page-section">
+                <div class="page-title">
+                    <h2>System Settings</h2>
+                    <p>Global configuration and administrative preferences.</p>
+                </div>
+
+                <div class="content-grid" style="grid-template-columns: 1fr 2fr;">
+                    <div class="card">
+                        <div class="sidebar-menu" style="padding: 10px;">
+                            <div class="menu-item active"><i class="fas fa-user-circle"></i> Profile Settings</div>
+                            <div class="menu-item"><i class="fas fa-lock"></i> Security</div>
+                            <div class="menu-item"><i class="fas fa-bell"></i> Notifications</div>
+                            <div class="menu-item"><i class="fas fa-server"></i> System Status</div>
+                            <div class="menu-item"><i class="fas fa-database"></i> Backup & Restore</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>General Configuration</h4>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 2rem;">
+                                <h5 style="margin-bottom: 1rem;">Service Features</h5>
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <div>
+                                        <p style="font-weight: 600;">Maintenance Mode</p>
+                                        <small style="color: var(--text-secondary);">Disable public access for scheduled
+                                            updates.</small>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <div>
+                                        <p style="font-weight: 600;">Auto-Escalation (SLA)</p>
+                                        <small style="color: var(--text-secondary);">Automatically mark as escalated
+                                            after timeout.</small>
+                                    </div>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div style="margin-top: 1rem;">
+                                    <label class="form-label">SLA Timeout (Hours)</label>
+                                    <input type="number" class="form-control" value="48" style="width: 100px;">
+                                </div>
+                            </div>
+
+                            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                            <div style="margin-bottom: 2rem;">
+                                <h5 style="margin-bottom: 1rem;">Broadcast System Alert</h5>
+                                <div class="form-group">
+                                    <label class="form-label">Alert Message</label>
+                                    <textarea class="form-control" rows="2"
+                                        placeholder="Enter message to broadcast to all users..."></textarea>
+                                </div>
+                                <button class="btn btn-primary"><i class="fas fa-bullhorn"></i> Broadcast Now</button>
+                            </div>
+
+                            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                            <div class="form-group">
+                                <label class="form-label" style="color: var(--text-main);">Admin Display Name</label>
+                                <input type="text" class="form-control" value="City Commissioner - HQ">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" style="color: var(--text-main);">Contact Email for System
+                                    Alerts</label>
+                                <input type="email" class="form-control" value="alerts@smartcity.gov">
+                            </div>
+
+                            <button class="btn btn-primary" style="margin-top: 1rem;">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- --- Complaint Detail Modal --- -->
+    <div class="modal-overlay" id="complaint-modal">
+        <div class="modal-body">
+            <div class="modal-header">
+                <h4 id="modal-title">Complaint Detail - #GRV-0000</h4>
+                <button class="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-content">
+                <div class="complaint-view-grid">
+                    <div>
+                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19480c5?q=80&w=1000&auto=format&fit=crop"
+                            alt="Complaint Issue" class="complaint-img" id="modal-img">
+                        <div style="margin-top: 1.5rem;">
+                            <h5 style="margin-bottom: 0.5rem;">Location Details</h5>
+                            <p id="modal-location" style="font-size: 0.9rem; color: var(--text-secondary);">
+                                <i class="fas fa-map-marker-alt"></i> MG Road, Ward 12, Sector 4
+                            </p>
+                            <div
+                                style="margin-top: 1rem; width: 100%; height: 150px; background: #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <p style="font-size: 0.8rem; color: var(--text-secondary);">Interactive Map Integration
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <span class="badge badge-pending" id="modal-status-badge">Pending</span>
+                            <span class="badge badge-high" id="modal-priority-badge" style="margin-left: 8px;">High
+                                Priority</span>
+                        </div>
+                        <h4 style="margin-bottom: 0.5rem;">Issue Description</h4>
+                        <p id="modal-desc" style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                            Large pothole in the middle of the road causing traffic congestion and potential accidents.
+                            It has been there for over 3 days.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label">Assign Department</label>
+                            <select class="form-select" id="modal-dept-select">
+                                <option>Roads & Transport</option>
+                                <option>Water Supply</option>
+                                <option>Sanitation</option>
+                                <option>Electricity</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Update Status</label>
+                            <select class="form-select" id="modal-status-select">
+                                <option>Pending Review</option>
+                                <option>In Progress</option>
+                                <option>Resolved</option>
+                                <option>Escalated</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Admin Remarks</label>
+                            <textarea class="form-control" rows="3"
+                                placeholder="Add notes for the field team..."></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                            <button class="btn btn-primary" style="flex: 1;">Update Ticket</button>
+                            <button class="btn btn-outline">Notify User</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- Scripts --- -->
+    <script>
+        // --- Mock Data ---
+        const complaints = [
+            { id: 'GRV-8241', citizen: 'John Doe', department: 'Roads & Transport', area: 'Ward 12', date: '2023-11-20', status: 'Pending', priority: 'High', desc: 'Pothole on main street causing accidents.', img: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=600&auto=format&fit=crop' },
+            { id: 'GRV-8242', citizen: 'Sarah Smith', department: 'Sanitation', area: 'Sector 5', date: '2023-11-21', status: 'In Progress', priority: 'Medium', desc: 'Garbage collection missed for 3 days.', img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=600&auto=format&fit=crop' },
+            { id: 'GRV-8243', citizen: 'Mike Ross', department: 'Water Supply', area: 'Ward 3', date: '2023-11-19', status: 'Resolved', priority: 'Low', desc: 'Small water leak fixed.', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=600&auto=format&fit=crop' },
+            { id: 'GRV-8244', citizen: 'Amara K.', department: 'Electricity', area: 'New Town', date: '2023-11-22', status: 'Escalated', priority: 'High', desc: 'Power outage in entire block since 12 hours.', img: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=600&auto=format&fit=crop' },
+            { id: 'GRV-8245', citizen: 'David G.', department: 'Roads & Transport', area: 'Ward 8', date: '2023-11-22', status: 'Pending', priority: 'Medium', desc: 'Street lights not working near park.', img: 'https://images.unsplash.com/photo-1540206276207-3af25c08abb4?q=80&w=600&auto=format&fit=crop' },
+            { id: 'GRV-8246', citizen: 'Elena V.', department: 'Sanitation', area: 'Old City', date: '2023-11-18', status: 'Resolved', priority: 'High', desc: 'Deep cleaning required after local festival.', img: 'https://images.unsplash.com/photo-1563161402-841f45df39c9?q=80&w=600&auto=format&fit=crop' }
+        ];
+
+        const departments = [
+            { name: 'Roads & Transport', admin: 'Robert Chen', active: 42, resolved: 512, status: 'Active' },
+            { name: 'Water Supply', admin: 'Jane Wilson', active: 28, resolved: 384, status: 'Active' },
+            { name: 'Sanitation', admin: 'Sam Brook', active: 35, resolved: 820, status: 'Active' },
+            { name: 'Electricity', admin: 'Tom Hardy', active: 14, resolved: 156, status: 'Active' },
+            { name: 'Parks & Garden', admin: 'Linda May', active: 8, resolved: 142, status: 'Maintenance' }
+        ];
+
+        const users = [
+            { id: 'USR-001', name: 'John Doe', email: 'john@example.com', phone: '+91 98765 43210', date: '2023-01-15', count: 4, status: 'Active' },
+            { id: 'USR-002', name: 'Sarah Smith', email: 'sarah@test.com', phone: '+91 88877 66554', date: '2023-02-10', count: 1, status: 'Active' },
+            { id: 'USR-003', name: 'Mike Ross', email: 'mike@law.com', phone: '+91 77766 55443', date: '2023-03-05', count: 12, status: 'Flagged' },
+            { id: 'USR-004', name: 'Amara K.', email: 'amara@web.com', phone: '+91 99988 77665', date: '2023-05-20', count: 2, status: 'Active' }
+        ];
+
+        // --- Auth Logic ---
+        const loginForm = document.getElementById('login-form');
+        const authOverlay = document.getElementById('auth-overlay');
+        const adminPanel = document.getElementById('admin-panel');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Simulate API call
+            authOverlay.classList.add('fade-out');
+            setTimeout(() => {
+                authOverlay.style.display = 'none';
+                adminPanel.style.display = 'block';
+                setTimeout(() => adminPanel.classList.add('fade-in-ui'), 50);
+                initCharts();
+                renderAll();
+            }, 600);
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            location.reload(); // Simple reload to reset state
+        });
+
+        // --- Navigation ---
+        const menuItems = document.querySelectorAll('.menu-item[data-target]');
+        const sections = document.querySelectorAll('.page-section');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.getAttribute('data-target');
+                switchSection(target);
+            });
+        });
+
+        function switchSection(targetId) {
+            menuItems.forEach(i => i.classList.remove('active'));
+            document.querySelector(`.menu-item[data-target="${targetId}"]`).classList.add('active');
+
+            sections.forEach(s => s.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+        }
+
+        // --- Rendering Logic ---
+        function renderAll() {
+            renderRecentComplaints();
+            renderComplaintsTable();
+            renderDepartments();
+            renderUsers();
+        }
+
+        function getStatusBadge(status) {
+            const s = status.toLowerCase().replace(' ', '-');
+            return `<span class="badge badge-${s}">${status}</span>`;
+        }
+
+        function getPriorityBadge(p) {
+            return `<span class="badge badge-${p.toLowerCase()}">${p}</span>`;
+        }
+
+        function renderRecentComplaints() {
+            const table = document.getElementById('recent-complaints-table');
+            table.innerHTML = complaints.slice(0, 4).map(c => `
+                <tr>
+                    <td><strong>#${c.id}</strong></td>
+                    <td>${c.citizen}</td>
+                    <td>${c.department}</td>
+                    <td>${c.date}</td>
+                    <td>${getStatusBadge(c.status)}</td>
+                    <td><button class="btn btn-outline" style="padding: 4px 10px;" onclick="viewComplaint('${c.id}')"><i class="fas fa-eye"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderComplaintsTable() {
+            const table = document.getElementById('all-complaints-table');
+            table.innerHTML = complaints.map(c => `
+                <tr>
+                    <td><strong>#${c.id}</strong></td>
+                    <td>${c.citizen}</td>
+                    <td>${c.department}</td>
+                    <td>${c.area}</td>
+                    <td>${c.date}</td>
+                    <td>${getPriorityBadge(c.priority)}</td>
+                    <td>${getStatusBadge(c.status)}</td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-outline" style="padding: 4px 10px;" onclick="viewComplaint('${c.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-outline" style="padding: 4px 10px; color: var(--danger);"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderDepartments() {
+            const table = document.getElementById('dept-table');
+            table.innerHTML = departments.map(d => `
+                <tr>
+                    <td><strong>${d.name}</strong></td>
+                    <td>${d.admin}</td>
+                    <td>${d.active}</td>
+                    <td>${d.resolved}</td>
+                    <td><span class="badge" style="background: ${d.status === 'Active' ? '#f0fdf4' : '#fef2f2'}; color: ${d.status === 'Active' ? '#16a34a' : '#dc2626'};">${d.status}</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 4px 10px;"><i class="fas fa-cog"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderUsers() {
+            const table = document.getElementById('user-table');
+            table.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${u.name}</td>
+                    <td>${u.email}</td>
+                    <td>${u.phone}</td>
+                    <td>${u.date}</td>
+                    <td>${u.count}</td>
+                    <td><span class="badge" style="background: ${u.status === 'Active' ? '#eff6ff' : '#fff7ed'}; color: ${u.status === 'Active' ? '#1d4ed8' : '#9a3412'};">${u.status}</span></td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 4px 10px;"><i class="fas fa-ban"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- Modal Logic ---
+        const modal = document.getElementById('complaint-modal');
+        const closeModal = document.querySelector('.modal-close');
+
+        function viewComplaint(id) {
+            const c = complaints.find(comp => comp.id === id);
+            if (!c) return;
+
+            document.getElementById('modal-title').innerText = `Complaint Detail - #${c.id}`;
+            document.getElementById('modal-desc').innerText = c.desc;
+            document.getElementById('modal-img').src = c.img;
+            document.getElementById('modal-status-badge').className = `badge badge-${c.status.toLowerCase().replace(' ', '-')}`;
+            document.getElementById('modal-status-badge').innerText = c.status;
+            document.getElementById('modal-priority-badge').className = `badge badge-${c.priority.toLowerCase()}`;
+            document.getElementById('modal-priority-badge').innerText = c.priority + ' Priority';
+
+            modal.style.display = 'flex';
+        }
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.onclick = (e) => {
+            if (e.target == modal) modal.style.display = 'none';
+        };
+
+        // --- Charts Implementation ---
+        function initCharts() {
+            // Trend Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+                    datasets: [{
+                        label: 'Reported Complaints',
+                        data: [450, 590, 800, 810, 560, 550],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { borderDash: [5, 5] } }, x: { grid: { display: false } } }
+                }
+            });
+
+            // Dept Distribution Chart
+            const deptCtx = document.getElementById('deptChart').getContext('2d');
+            new Chart(deptCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Roads', 'Water', 'Sanitation', 'Power'],
+                    datasets: [{
+                        data: [35, 25, 20, 20],
+                        backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } },
+                    cutout: '70%'
+                }
+            });
+
+            // Analytics Report Chart
+            const reportCtx = document.getElementById('reportChart').getContext('2d');
+            new Chart(reportCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Roads', 'Water', 'Sanitation', 'Power', 'Legal', 'Admin'],
+                    datasets: [{
+                        label: 'Resolved',
+                        data: [120, 150, 180, 90, 40, 60],
+                        backgroundColor: '#10b981'
+                    }, {
+                        label: 'Pending',
+                        data: [30, 20, 45, 15, 10, 5],
+                        backgroundColor: '#f59e0b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { stacked: true }, y: { stacked: true } }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

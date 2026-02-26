@@ -5,14 +5,13 @@
     <meta charset="UTF-8">
     <title>CivicCare - Smart Complaint System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
 </head>
+< <body>
 
-<body>
-
-    <!-- Floating Background Shapes -->
+    <!-- Background Shapes -->
     <div class="bg-shapes">
         <span></span>
         <span></span>
@@ -20,57 +19,138 @@
         <span></span>
     </div>
 
+    <!-- NAVBAR -->
     <header id="navbar">
         <div class="logo">CivicCare</div>
         <nav>
             <a href="#">Home</a>
-            <a href="#">Departments</a>
-            <a href="#">Login</a>
-            <a href="#">aboutus</a>
-            <a href="#">Contact</a>
+            <a href="#departments">Departments</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <a href="login.html" class="nav-btn">Login</a>
+            <a href="admin.html" class="nav-btn"
+                style="background: transparent; border: 1px solid #00e5ff; color: #00e5ff;">Admin</a>
         </nav>
     </header>
 
-    <section class="hero">
-        <div class="hero-content reveal">
-            <h2 class="gradient-text">Transform Your City With One Click</h2>
-            <p>Report civic issues instantly. Track progress in real-time. Build a smarter community.</p>
+    <!-- HERO SECTION (ONLY ONE, CLEAN) -->
+    <section class="hero-new">
+        <div class="hero-left">
+            <h1>
+                Making <span>City Life</span><br>
+                Smarter & Safer
+            </h1>
+
+            <p>
+                Empowering citizens to report urban issues instantly.
+                Our AI-driven response system ensures your concerns
+                reach the right department for fast resolution.
+            </p>
+
             <div class="hero-buttons">
-                <button class="btn btn-secondary">🔐 Login</button>
+                <button class="btn btn-primary" onclick="window.location.href='login.html'">Login</button>
+                <button class="btn btn-outline" onclick="window.location.href='track.html'">Track Status</button>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="image-card">
+                <img id="dynamicImage" src="pothole.jpg" alt="Civic Issue">
             </div>
         </div>
     </section>
 
+    <!-- HOW IT WORKS -->
     <section class="features">
-        <h2 class="reveal">How It Works</h2>
+        <h2 class="reveal">How CivicCare Works</h2>
         <div class="cards">
             <div class="card reveal">
-                <h3>1️⃣ Report</h3>
-                <p>Select issue type, upload photo, and submit in seconds.</p>
+                <h3>Report</h3>
+                <p>Submit complaint with department, photo & location.</p>
             </div>
             <div class="card reveal">
-                <h3>2️⃣ Track</h3>
-                <p>Monitor real-time progress with status updates.</p>
+                <h3>Smart Routing</h3>
+                <p>AI routes complaint to the correct department.</p>
             </div>
             <div class="card reveal">
-                <h3>3️⃣ Resolve</h3>
-                <p>Authorities fix the issue and update resolution proof.</p>
+                <h3>Track & Resolve</h3>
+                <p>Track real-time updates until issue is resolved.</p>
             </div>
         </div>
     </section>
 
+    <!-- DEPARTMENTS -->
+    <section id="departments" class="departments">
+        <h2 class="reveal">Supported Departments</h2>
+        <div class="dept-grid">
+            <div class="dept-card reveal">Water Supply</div>
+            <div class="dept-card reveal">Road Infrastructure</div>
+            <div class="dept-card reveal">Electricity</div>
+            <div class="dept-card reveal">Waste Management</div>
+            <div class="dept-card reveal">Parks & Gardens</div>
+            <div class="dept-card reveal">Traffic & Transport</div>
+        </div>
+    </section>
+
+    <section class="impact">
+        <h2 class="reveal">Our Impact</h2>
+
+        <div class="impact-grid">
+
+            <div class="impact-card tilt reveal">
+                <h3>⚡ Faster Resolution</h3>
+                <p>AI-powered routing ensures complaints reach the correct authority instantly.</p>
+            </div>
+
+            <div class="impact-card tilt reveal">
+                <h3>🔍 Transparent Tracking</h3>
+                <p>Citizens can monitor real-time complaint progress with full visibility.</p>
+            </div>
+
+            <div class="impact-card tilt reveal">
+                <h3>🛡 Accountability</h3>
+                <p>Digital workflow improves department responsibility and response time.</p>
+            </div>
+
+            <div class="impact-card tilt reveal">
+                <h3>🌍 24/7 Access</h3>
+                <p>Accessible anytime from mobile, tablet, or desktop platforms.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="about">
+        <h2 class="reveal">About CivicCare</h2>
+        <p class="reveal">
+            CivicCare bridges the gap between citizens and municipal authorities
+            through transparent and efficient digital governance.
+        </p>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="contact">
+        <h2 class="reveal">Contact Us</h2>
+        <div class="contact-container reveal">
+            <input type="text" placeholder="Your Name">
+            <input type="email" placeholder="Your Email">
+            <textarea placeholder="Your Message"></textarea>
+            <button class="btn btn-primary">Send Message</button>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
     <footer>
         <p>© 2026 CivicCare | Smart Governance Platform</p>
     </footer>
 
     <script>
-        /* Navbar Glow on Scroll */
         window.addEventListener("scroll", function () {
             const nav = document.getElementById("navbar");
             nav.classList.toggle("scrolled", window.scrollY > 50);
         });
 
-        /* Scroll Reveal Animation */
         const reveals = document.querySelectorAll(".reveal");
 
         window.addEventListener("scroll", () => {
@@ -83,7 +163,30 @@
             });
         });
     </script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
 
-</body>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyC02P5v3WFqueR7qpwxA3cxEKVsUqQpycs",
+            authDomain: "smart-grievance-project.firebaseapp.com",
+            projectId: "smart-grievance-project",
+            storageBucket: "smart-grievance-project.firebasestorage.app",
+            messagingSenderId: "351881017713",
+            appId: "1:351881017713:web:e0deca315c159579481ed0",
+            measurementId: "G-3M2YY17X7P"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+    </script>
+
+    </body>
 
 </html>
