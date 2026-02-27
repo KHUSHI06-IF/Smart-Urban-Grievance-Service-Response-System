@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Complaints - Smart Urban Grievance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="translations.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1d4ed8', // blue-700
+                        secondary: '#eff6ff', // blue-50
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .sidebar-link:hover {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .sidebar-link.active {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border-right: 4px solid #1d4ed8;
+        }
+
+        .complaint-card {
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .complaint-card:hover {
+            transform: translateY(-3px);
+            border-color: #e5e7eb;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden text-gray-800">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg flex flex-col hidden md:flex z-20">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-gray-100">
+            <i class="fas fa-city text-primary text-2xl mr-3"></i>
+            <span class="text-xl font-bold text-gray-800">UrbanCare</span>
+        </div>
+
+        <!-- Links -->
+        <nav class="flex-1 py-4 overflow-y-auto space-y-1">
+            <a href="dashboard.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-home w-5 mr-3"></i> <span data-translate="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="complaint.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-plus-circle w-5 mr-3"></i> <span data-translate="nav_file_complaint">File
+                    Complaint</span>
+            </a>
+            <a href="my-complaints.html"
+                class="sidebar-link active flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-list w-5 mr-3"></i> <span data-translate="nav_my_complaints">My Complaints</span>
+            </a>
+            <a href="track.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-map-marker-alt w-5 mr-3"></i> <span data-translate="nav_track_complaint">Track
+                    Complaint</span>
+            </a>
+            <a href="profile.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-user w-5 mr-3"></i> <span data-translate="nav_profile">Profile</span>
+            </a>
+        </nav>
+
+        <!-- Logout -->
+        <div class="p-4 border-t border-gray-100">
+            <a href="login.html"
+                class="sidebar-link flex items-center px-4 py-2 text-red-500 font-medium rounded-lg hover:bg-red-50 hover:text-red-600">
+                <i class="fas fa-sign-out-alt w-5 mr-3"></i> <span data-translate="nav_logout">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Top Navbar -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10">
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 w-96">
+                <i class="fas fa-search text-gray-400 mr-2"></i>
+                <input type="text" data-translate="nav_search_placeholder" placeholder="Search complaint by ID..."
+                    class="bg-transparent border-none outline-none w-full text-sm">
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <!-- Language Selector -->
+                <select id="languageSelector"
+                    class="bg-transparent text-gray-600 text-sm font-medium focus:outline-none cursor-pointer">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                </select>
+
+                <!-- Notifications -->
+                <button class="relative text-gray-500 hover:text-gray-700 transition">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span
+                        class="absolute top-0 right-0 -mt-1 -mr-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">3</span>
+                </button>
+
+                <!-- Profile Dropdown -->
+                <div class="flex items-center cursor-pointer">
+                    <img src="https://ui-avatars.com/api/?name=Khushi&background=1d4ed8&color=fff" alt="User"
+                        class="h-9 w-9 rounded-full border-2 border-primary object-cover">
+                    <div class="ml-3 hidden md:block">
+                        <p class="text-sm font-semibold text-gray-700">Khushi</p>
+                        <p class="text-xs text-gray-500">Citizen</p>
+                    </div>
+                    <i class="fas fa-chevron-down ml-2 text-xs text-gray-400"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Area -->
+        <main class="flex-1 overflow-y-auto p-6 lg:p-8">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800" data-translate="my_complaints_title">My Complaints</h1>
+                    <p class="text-gray-500 text-sm mt-1" data-translate="my_complaints_desc">History of all your filed
+                        concerns.</p>
+                </div>
+
+                <!-- Filter Dropdown -->
+                <div class="relative">
+                    <select
+                        class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 outline-none font-medium cursor-pointer shadow-sm pr-8">
+                        <option value="all" data-translate="filter_all">All Statuses</option>
+                        <option value="pending" data-translate="stat_pending">Pending</option>
+                        <option value="progress" data-translate="stat_progress">In Progress</option>
+                        <option value="resolved" data-translate="stat_resolved">Resolved</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Complaints List -->
+            <div id="complaintsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Complaints will load here dynamically -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-center mt-8">
+                <nav class="flex items-center gap-1" aria-label="Pagination">
+                    <button
+                        class="p-2 inline-flex items-center gap-2 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-primary transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+                        disabled>
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <button
+                        class="w-10 h-10 bg-primary text-white rounded-md text-sm font-medium focus:outline-none transition hover:bg-blue-800">1</button>
+                    <button
+                        class="w-10 h-10 bg-white border border-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none transition hover:text-primary">2</button>
+                    ...
+                    <button
+                        class="p-2 inline-flex items-center gap-2 rounded-md border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-primary transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </nav>
+            </div>
+
+        </main>
+    </div>
+    <!-- Firebase SDK -->
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC02P5v3WFqueR7qpwxA3cxEKVsUqQpycs",
+            authDomain: "smart-grievance-project.firebaseapp.com",
+            projectId: "smart-grievance-project",
+            storageBucket: "smart-grievance-project.firebasestorage.app",
+            messagingSenderId: "351881017713",
+            appId: "1:351881017713:web:e0deca315c159579481ed0",
+            measurementId: "G-3M2YY17X7P"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const container = document.getElementById("complaintsContainer");
+
+        onAuthStateChanged(auth, async (user) => {
+
+            if (!user) {
+                alert("Please login first");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const userEmail = user.email;
+
+            try {
+                const q = query(
+                    collection(db, "complaints"),
+                    where("email", "==", userEmail)
+                );
+
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = `
+                        <div class="col-span-3 text-center text-gray-500">
+                            No complaints found.
+                        </div>
+                    `;
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+
+                    const data = doc.data();
+
+                    // Dynamic badge color
+                    let statusColor = "blue"; // default
+                    if (data.status === "Pending") statusColor = "yellow";
+                    if (data.status === "In Progress") statusColor = "blue";
+                    if (data.status === "Resolved") statusColor = "green";
+
+                    container.innerHTML += `
+                        <div class="bg-white rounded-xl shadow-md p-6 flex flex-col justify-between complaint-card">
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-sm font-bold text-gray-500">#${doc.id}</span>
+                                    <span class="text-xs px-3 py-1 rounded-full bg-${statusColor}-100 text-${statusColor}-700">
+                                        ${data.status || "Pending"}
+                                    </span>
+                                </div>
+
+                                <h3 class="text-lg font-semibold mb-2">${data.title}</h3>
+                                <p class="text-sm text-gray-500 mb-4">${data.description}</p>
+                            </div>
+
+                            <div class="border-t pt-3">
+                                <p class="text-sm text-gray-400 mb-2">
+                                    ${new Date(data.createdAt).toLocaleString()}
+                                </p>
+
+                                <a href="track.html?id=${doc.id}"
+                                   class="block text-center bg-gray-100 hover:bg-gray-200 text-primary py-2 rounded-lg text-sm font-medium">
+                                    Track Status
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Error fetching complaints:", error);
+                alert("Error loading complaints");
+            }
+
+        });
+
+    </script>
+</body>
+
+</html>

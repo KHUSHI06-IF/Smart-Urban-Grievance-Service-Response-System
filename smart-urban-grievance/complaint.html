@@ -1,48 +1,579 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Complaint - Smart Urban Grievance</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="script.js"></script>
-</head>
-
-<body class="bg-slate-900 text-white p-10">
-
-    <div class="max-w-xl mx-auto bg-slate-800 p-8 rounded-2xl shadow-2xl">
-
-        <h2 class="text-2xl font-bold mb-6">📝 Register Complaint</h2>
-
-        <textarea id="complaintText" class="w-full p-3 rounded-lg bg-slate-700 mb-4"
-            placeholder="Describe your issue..."></textarea>
-
-        <input type="text" id="location" class="w-full p-3 rounded-lg bg-slate-700 mb-4" placeholder="Enter location">
-
-        <button onclick="submitComplaint()" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg">
-            Submit Complaint
-        </button>
-
-        <div id="aiResult" class="mt-6"></div>
-
-    </div>
-
+    <script src="translations.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
-        function submitComplaint() {
-
-            let text = document.getElementById("complaintText").value;
-            let result = antiGravityAgent(text);
-
-            document.getElementById("aiResult").innerHTML = `
-        <div class="bg-slate-700 p-4 rounded-lg mt-4">
-            <p><b>Category:</b> ${result.category}</p>
-            <p><b>Priority:</b> ${result.priority}</p>
-            <p><b>Department:</b> ${result.department}</p>
-            <p><b>Resolution:</b> ${result.predictedResolution}</p>
-            <p><b>AI Severity Score:</b> ${result.aiScore}</p>
-        </div>
-    `;
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1d4ed8', // blue-700
+                        secondary: '#eff6ff', // blue-50
+                    }
+                }
+            }
         }
     </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
 
+        .sidebar-link {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .sidebar-link:hover {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .sidebar-link.active {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border-right: 4px solid #1d4ed8;
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden text-gray-800">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg flex flex-col hidden md:flex z-20">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-gray-100">
+            <i class="fas fa-city text-primary text-2xl mr-3"></i>
+            <span class="text-xl font-bold text-gray-800">UrbanCare</span>
+        </div>
+
+        <!-- Links -->
+        <nav class="flex-1 py-4 overflow-y-auto space-y-1">
+            <a href="dashboard.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-home w-5 mr-3"></i> <span data-translate="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="complaint.html" class="sidebar-link active flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-plus-circle w-5 mr-3"></i> <span data-translate="nav_file_complaint">File
+                    Complaint</span>
+            </a>
+            <a href="my-complaints.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-list w-5 mr-3"></i> <span data-translate="nav_my_complaints">My Complaints</span>
+            </a>
+            <a href="track.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-map-marker-alt w-5 mr-3"></i> <span data-translate="nav_track_complaint">Track
+                    Complaint</span>
+            </a>
+            <a href="profile.html" class="sidebar-link flex items-center px-6 py-3 text-gray-600 font-medium">
+                <i class="fas fa-user w-5 mr-3"></i> <span data-translate="nav_profile">Profile</span>
+            </a>
+        </nav>
+
+        <!-- Logout -->
+        <div class="p-4 border-t border-gray-100">
+            <a href="login.html"
+                class="sidebar-link flex items-center px-4 py-2 text-red-500 font-medium rounded-lg hover:bg-red-50 hover:text-red-600">
+                <i class="fas fa-sign-out-alt w-5 mr-3"></i> <span data-translate="nav_logout">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Top Navbar -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10">
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 w-96">
+                <i class="fas fa-search text-gray-400 mr-2"></i>
+                <input type="text" data-translate="nav_search_placeholder" placeholder="Search complaint by ID..."
+                    class="bg-transparent border-none outline-none w-full text-sm">
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <!-- Language Selector -->
+                <select id="languageSelector"
+                    class="bg-transparent text-gray-600 text-sm font-medium focus:outline-none cursor-pointer">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                </select>
+
+                <!-- Notifications -->
+                <button class="relative text-gray-500 hover:text-gray-700 transition">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span
+                        class="absolute top-0 right-0 -mt-1 -mr-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">3</span>
+                </button>
+
+                <!-- Profile Dropdown -->
+                <div class="flex items-center cursor-pointer">
+                    <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=1d4ed8&color=fff"
+                        alt="User" class="h-9 w-9 rounded-full border-2 border-primary object-cover">
+                    <div class="ml-3 hidden md:block">
+                        <p id="userName" class="text-sm font-semibold text-gray-700">Loading...</p>
+                        <p id="userRole" class="text-xs text-gray-500">Citizen</p>
+                    </div>
+                    <i class="fas fa-chevron-down ml-2 text-xs text-gray-400"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Area -->
+        <main class="flex-1 overflow-y-auto p-6 lg:p-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800" data-translate="file_complaint_title">File a New Complaint
+                </h1>
+                <p class="text-gray-500 text-sm mt-1" data-translate="file_complaint_desc">Please provide the details
+                    below to register your grievance.</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:p-8 max-w-4xl">
+                <form id="complaintForm" class="space-y-6">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Title -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="form_title">Complaint Title</span>
+                                <span class="text-red-500">*</span></label>
+                            <input type="text" id="title" required data-translate="form_title_placeholder"
+                                placeholder="e.g., Broken street light near Main St."
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                        </div>
+
+                        <!-- Category -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="form_category">Category</span>
+                                <span class="text-red-500">*</span></label>
+                            <select id="category" required
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition bg-white appearance-none">
+                                <option value="" disabled selected data-translate="form_category_select">Select Category
+                                </option>
+                                <option value="Road" data-translate="cat_road">Road & Transport</option>
+                                <option value="Water" data-translate="cat_water">Water Supply</option>
+                                <option value="Garbage" data-translate="cat_garbage">Garbage & Sanitation</option>
+                                <option value="Electricity" data-translate="cat_electricity">Electricity</option>
+                                <option value="Other" data-translate="cat_other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="form_address">Detailed Address / Location</span>
+                                <span class="text-red-500">*</span></label>
+                            <div class="flex gap-2">
+                                <input type="text" id="address" required data-translate="form_address_placeholder"
+                                    placeholder="Full location address"
+                                    class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition">
+                                <button type="button" onclick="getLocation()"
+                                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg border border-gray-300 transition flex items-center justify-center"
+                                    title="Get GPS Location">
+                                    <i class="fas fa-location-arrow"></i>
+                                </button>
+                            </div>
+                            <p id="gps-status" class="text-xs text-gray-500 mt-1"></p>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                                <span data-translate="form_desc">Detailed Description</span>
+                                <span class="text-red-500">*</span></label>
+                            <textarea id="description" required rows="4" data-translate="form_desc_placeholder"
+                                placeholder="Describe the issue in detail..."
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition resize-y"></textarea>
+                        </div>
+
+                        <!-- Upload Image -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2"
+                                data-translate="form_upload">Upload Image Evidence</label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition cursor-pointer"
+                                onclick="document.getElementById('file-upload').click()">
+                                <div class="space-y-1 text-center">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <span
+                                            class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary">
+                                            <span data-translate="upload_text1">Upload a file</span>
+                                            <input id="file-upload" name="file-upload" type="file" class="sr-only"
+                                                accept="image/*" onchange="previewImage(event)">
+                                        </span>
+                                        <p class="pl-1" data-translate="upload_text2">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500" data-translate="upload_text3">PNG, JPG, GIF up to
+                                        10MB</p>
+                                </div>
+                            </div>
+                            <!-- Image Preview -->
+                            <div id="image-preview-container" class="mt-4 hidden">
+                                <p class="text-sm text-gray-500 mb-2">Preview:</p>
+                                <div class="relative inline-block">
+                                    <img id="image-preview" src="#" alt="Preview"
+                                        class="h-32 rounded-lg border object-cover">
+                                    <button type="button" onclick="removeImage()"
+                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center hover:bg-red-600 shadow">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-4 border-t border-gray-100 flex justify-end">
+                        <button type="button" onclick="window.history.back()"
+                            class="bg-white text-gray-700 border border-gray-300 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition mr-4"
+                            data-translate="btn_cancel">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-800 transition shadow-md flex items-center">
+                            <i class="fas fa-paper-plane mr-2"></i> <span data-translate="btn_submit">Submit
+                                Complaint</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts for Form Handling -->
+    <script>
+        function previewImage(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('image-preview').src = e.target.result;
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('file-upload').value = "";
+            document.getElementById('image-preview-container').classList.add('hidden');
+        }
+
+        function getLocation() {
+            const status = document.getElementById('gps-status');
+            const addressInput = document.getElementById('address');
+
+            if (!navigator.geolocation) {
+                status.textContent = "Geolocation is not supported by your browser";
+                status.classList.add('text-red-500');
+                return;
+            }
+
+            status.textContent = "Locating...";
+            status.classList.remove('text-red-500', 'text-green-500');
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lon = position.coords.longitude.toFixed(6);
+                    addressInput.value = `GPS: ${lat}, ${lon}`;
+                    status.textContent = "Location grabbed successfully!";
+                    status.classList.add('text-green-500');
+                    status.classList.remove('text-red-500');
+                },
+                () => {
+                    status.textContent = "Unable to retrieve your location";
+                    status.classList.add('text-red-500');
+                    status.classList.remove('text-green-500');
+                }
+            );
+        }
+
+    </script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // 🔥 YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyC02P5v3WFqueR7qpwxA3cxEKVsUqQpycs",
+            authDomain: "smart-grievance-project.firebaseapp.com",
+            projectId: "smart-grievance-project",
+            storageBucket: "smart-grievance-project.firebasestorage.app",
+            messagingSenderId: "351881017713",
+            appId: "1:351881017713:web:e0deca315c159579481ed0",
+            measurementId: "G-3M2YY17X7P"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userDataCache = {};
+
+        // Check logged-in user
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                let displayName = user.displayName || user.email.split('@')[0];
+
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        userDataCache = userData;
+                        if (userData.name) displayName = userData.name;
+                        if (userData.firstName) displayName = userData.firstName + " " + (userData.lastName || "");
+                    }
+                } catch (error) {
+                    console.error("Error fetching Firestore user data:", error);
+                }
+
+                displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+
+                const userNameEl = document.getElementById("userName");
+                if (userNameEl) userNameEl.innerText = displayName;
+
+                const userRoleEl = document.getElementById("userRole");
+                if (userRoleEl) userRoleEl.innerText = "Citizen";
+
+                const userAvatarEl = document.getElementById("userAvatar");
+                if (userAvatarEl) userAvatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=1d4ed8&color=fff`;
+
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // Handle Complaint Submission
+        document.getElementById('complaintForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (!currentUser) {
+                alert("You must be logged in to file a complaint.");
+                return;
+            }
+
+            // Get form values
+            const formTitle = document.getElementById("title").value;
+            const formCategory = document.getElementById("category").value;
+            // No priority dropdown anymore, omitting
+            const formAddress = document.getElementById("address").value;
+            const formDesc = document.getElementById("description").value;
+
+            // Optional: Image element mapping
+            const imgElement = document.getElementById("image-preview");
+            const imageStr = imgElement ? (imgElement.src.startsWith("data:") ? imgElement.src : "") : "";
+
+            // Unique tracking ID
+            const randomId = 'CMP' + Math.floor(10000 + Math.random() * 90000);
+
+            // Fetch user info based on cache vs auth
+            const submitName = userDataCache.name || currentUser.displayName || "Citizen";
+            const submitEmail = currentUser.email;
+            const submitPhone = userDataCache.phone || "";
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            try {
+                // Button UI Loading State
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
+
+                // Save to Firestore 'complaints' collection under generating complaint doc ID
+                await setDoc(doc(db, "complaints", randomId), {
+                    complaintId: randomId,
+                    userId: currentUser.uid,
+                    name: submitName,
+                    email: submitEmail,
+                    mobile: submitPhone,
+                    title: formTitle,
+                    category: formCategory,
+                    description: formDesc,
+                    address: formAddress,
+                    image: imageStr,        // Optional base64 capture
+                    status: "Pending",
+                    createdAt: new Date().toISOString()
+                });
+
+                alert(`Complaint submitted successfully!\nYour tracking ID is: ${randomId}`);
+                window.location.href = `track.html?id=${randomId}`;
+
+            } catch (error) {
+                console.error("Error saving complaint:", error);
+                alert("An error occurred while filing your complaint: " + error.message);
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import {
+            getFirestore,
+            doc,
+            getDoc,
+            collection,
+            addDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // 🔥 Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyC02P5v3WFqueR7qpwxA3cxEKVsUqQpycs",
+            authDomain: "smart-grievance-project.firebaseapp.com",
+            projectId: "smart-grievance-project",
+            storageBucket: "smart-grievance-project.firebasestorage.app",
+            messagingSenderId: "351881017713",
+            appId: "1:351881017713:web:e0deca315c159579481ed0",
+            measurementId: "G-3M2YY17X7P"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userDataCache = {};
+
+        // 🔐 Check Logged-in User
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            currentUser = user;
+
+            // Fetch extra user data from Firestore (optional)
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    userDataCache = userDoc.data();
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+
+            // Update Navbar UI
+            let displayName =
+                userDataCache.name ||
+                user.displayName ||
+                user.email.split("@")[0];
+
+            displayName =
+                displayName.charAt(0).toUpperCase() +
+                displayName.slice(1);
+
+            document.getElementById("userName").innerText = displayName;
+            document.getElementById("userRole").innerText = "Citizen";
+            document.getElementById("userAvatar").src =
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=1d4ed8&color=fff`;
+        });
+
+        // 📝 Complaint Form Submission
+        document.getElementById("complaintForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (!currentUser) {
+                alert("You must be logged in to file a complaint.");
+                return;
+            }
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML =
+                    '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
+
+                // 🔹 Get Form Values
+                const title = document.getElementById("title").value.trim();
+                const category = document.getElementById("category").value;
+                const address = document.getElementById("address").value.trim();
+                const description = document.getElementById("description").value.trim();
+
+                if (!title || !category || !address || !description) {
+                    alert("Please fill all required fields.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    return;
+                }
+
+                // 🔹 Generate Unique Complaint ID
+                const complaintId = "CMP" + Date.now();
+
+                // 🔹 Optional Image (Base64 preview – temporary solution)
+                const imgElement = document.getElementById("image-preview");
+                const imageStr =
+                    imgElement && imgElement.src.startsWith("data:")
+                        ? imgElement.src
+                        : "";
+
+                // 🔹 Save Complaint to Firestore
+                await addDoc(collection(db, "complaints"), {
+                    complaintId: complaintId,
+                    userId: currentUser.uid,
+                    name:
+                        userDataCache.name ||
+                        currentUser.displayName ||
+                        "Citizen",
+                    email: currentUser.email,
+                    mobile: userDataCache.phone || "",
+                    title: title,
+                    category: category,
+                    description: description,
+                    address: address,
+                    image: imageStr,
+                    status: "Pending",
+                    createdAt: serverTimestamp()
+                });
+
+                alert(`✅ Complaint submitted successfully!\nTracking ID: ${complaintId}`);
+
+                // Reset Form
+                document.getElementById("complaintForm").reset();
+                document
+                    .getElementById("image-preview-container")
+                    .classList.add("hidden");
+
+                // Redirect to tracking page
+                setTimeout(() => {
+                    window.location.href = `track.html?id=${complaintId}`;
+                }, 1200);
+
+            } catch (error) {
+                console.error("Error saving complaint:", error);
+                alert("❌ Error filing complaint: " + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    </script>
 </body>
 
 </html>

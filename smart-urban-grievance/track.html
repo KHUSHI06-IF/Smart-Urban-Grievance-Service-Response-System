@@ -1,75 +1,267 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    <title>Track Complaint</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-
-    <nav class="navbar">
-        <a href="index.html" class="logo">SmartUrban</a>
-    </nav>
-
-    <section class="page-section">
-        <h2>Track Your Complaint</h2>
-
-        <div class="form-box">
-            <input type="text" placeholder="Enter Complaint ID">
-            <button class="btn primary">Track</button>
-
-            <div class="status-box">
-                <p>Status: <span class="status pending">In Progress</span></p>
-            </div>
-        </div>
-
-    </section>
-
-</body>
-
-</html>
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Smart Urban AI | Track Complaint</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Complaint - Smart Urban Grievance</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f3f4f6;
+        }
+
+        .step-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .step-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .step-line {
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            bottom: -8px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            position: relative;
+            background: #f3f4f6;
+            border: 2px solid #e5e7eb;
+            color: #9ca3af;
+        }
+
+        .completed .step-icon {
+            background: #1d4ed8;
+            color: white;
+            border: none;
+        }
+
+        .active .step-icon {
+            background: #eff6ff;
+            border: 2px solid #1d4ed8;
+            color: #1d4ed8;
+        }
+
+        .completed .step-line,
+        .active .step-line {
+            background: #1d4ed8;
+        }
+    </style>
 </head>
 
-<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+<body class="flex h-screen">
 
-    <div class="bg-slate-800/60 backdrop-blur-lg p-10 rounded-2xl shadow-2xl w-96 text-center">
+    <div class="flex-1 p-8 overflow-y-auto">
 
-        <h1 class="text-3xl font-bold mb-6">Track Complaint</h1>
+        <h1 class="text-2xl font-bold mb-6">Track Complaint</h1>
 
-        <input type="text" id="complaintId" placeholder="Enter Complaint ID"
-            class="w-full p-3 mb-4 rounded-lg bg-slate-700 focus:outline-none">
+        <!-- Search -->
+        <div class="bg-white p-6 rounded-xl shadow mb-8 max-w-3xl">
+            <div class="flex gap-4">
+                <input id="trackInput" type="text" placeholder="Enter Complaint ID"
+                    class="flex-1 border px-4 py-3 rounded-lg outline-none">
 
-        <button onclick="trackComplaint()" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg mb-4 transition">
-            Track
-        </button>
+                <button id="trackBtn" class="bg-blue-700 text-white px-6 py-3 rounded-lg">
+                    Track
+                </button>
+            </div>
+        </div>
 
-        <div id="statusBox" class="text-lg mt-4"></div>
+        <!-- Result -->
+        <div id="trackingResult" class="hidden max-w-3xl space-y-6">
+
+            <!-- Info Card -->
+            <div class="bg-white rounded-xl shadow p-6">
+
+                <div class="flex justify-between mb-4">
+                    <h3 id="displayId" class="font-bold text-lg"></h3>
+                    <span id="statusBadge" class="px-3 py-1 text-xs rounded-full bg-gray-100"></span>
+                </div>
+
+                <h4 id="complaintTitle" class="text-xl font-semibold mb-2"></h4>
+                <p id="complaintDesc" class="text-gray-600 mb-4"></p>
+
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Category</p>
+                        <p id="complaintCategory" class="font-medium"></p>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-500">Address</p>
+                        <p id="complaintAddress" class="font-medium"></p>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-500">Submitted On</p>
+                        <p id="complaintDate" class="font-medium"></p>
+                    </div>
+                </div>
+
+                <div id="imageContainer" class="mt-6 hidden">
+                    <p class="text-sm text-gray-500 mb-2">Attached Image</p>
+                    <img id="complaintImage" class="h-32 rounded shadow">
+                </div>
+
+            </div>
+
+            <!-- Timeline -->
+            <div class="bg-white rounded-xl shadow p-6">
+
+                <h3 class="font-bold mb-6">Tracking Progress</h3>
+
+                <div class="relative">
+
+                    <div class="step-item flex" id="step1">
+                        <div class="step-line"></div>
+                        <div class="step-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="ml-6">
+                            <h4 class="font-semibold">Complaint Submitted</h4>
+                        </div>
+                    </div>
+
+                    <div class="step-item flex" id="step2">
+                        <div class="step-line"></div>
+                        <div class="step-icon"><i class="fas fa-check-double"></i></div>
+                        <div class="ml-6">
+                            <h4 class="font-semibold">Verified</h4>
+                        </div>
+                    </div>
+
+                    <div class="step-item flex" id="step3">
+                        <div class="step-line"></div>
+                        <div class="step-icon"><i class="fas fa-tools"></i></div>
+                        <div class="ml-6">
+                            <h4 class="font-semibold">In Progress</h4>
+                        </div>
+                    </div>
+
+                    <div class="step-item flex" id="step4">
+                        <div class="step-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="ml-6">
+                            <h4 class="font-semibold">Resolved</h4>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
 
     </div>
 
-    <script>
-        function trackComplaint() {
-            let id = document.getElementById("complaintId").value;
-            let complaints = JSON.parse(localStorage.getItem("complaints") || "[]");
+    <!-- FIREBASE SCRIPT -->
+    <script type="module">
 
-            let found = complaints.find(c => c.id === id);
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-            if (found) {
-                document.getElementById("statusBox").innerHTML =
-                    "📌 Status: <span class='text-green-400 font-bold'>" + found.status + "</span>";
-            } else {
-                document.getElementById("statusBox").innerHTML =
-                    "<span class='text-red-400'>❌ Complaint Not Found!</span>";
+        const firebaseConfig = {
+            apiKey: "AIzaSyC02P5v3WFqueR7qpwxA3cxEKVsUqQpycs",
+            authDomain: "smart-grievance-project.firebaseapp.com",
+            projectId: "smart-grievance-project",
+            storageBucket: "smart-grievance-project.firebasestorage.app",
+            messagingSenderId: "351881017713",
+            appId: "1:351881017713:web:e0deca315c159579481ed0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const btn = document.getElementById("trackBtn");
+        const input = document.getElementById("trackInput");
+
+        btn.addEventListener("click", () => {
+            const id = input.value.trim();
+            if (!id) { alert("Enter Complaint ID"); return; }
+            loadComplaint(id);
+        });
+
+        window.onload = function () {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get("id");
+            if (id) {
+                input.value = id;
+                loadComplaint(id);
             }
+        };
+
+        async function loadComplaint(id) {
+
+            const docRef = doc(db, "complaints", id);
+            const docSnap = await getDoc(docRef);
+
+            if (!docSnap.exists()) {
+                alert("Complaint not found!");
+                return;
+            }
+
+            const data = docSnap.data();
+
+            document.getElementById("trackingResult").classList.remove("hidden");
+
+            document.getElementById("displayId").innerText = "#" + id;
+            document.getElementById("complaintTitle").innerText = data.title;
+            document.getElementById("complaintDesc").innerText = data.description;
+            document.getElementById("complaintCategory").innerText = data.category || "-";
+            document.getElementById("complaintAddress").innerText = data.address || "-";
+
+            document.getElementById("complaintDate").innerText =
+                new Date(data.createdAt).toLocaleString("en-IN");
+
+            document.getElementById("statusBadge").innerText = data.status;
+
+            if (data.image) {
+                document.getElementById("imageContainer").classList.remove("hidden");
+                document.getElementById("complaintImage").src = data.image;
+            }
+
+            updateSteps(data.status);
         }
+
+        function updateSteps(status) {
+
+            const steps = ["step1", "step2", "step3", "step4"];
+
+            steps.forEach(id => {
+                document.getElementById(id).classList.remove("completed", "active");
+            });
+
+            if (status === "Pending") {
+                document.getElementById("step1").classList.add("active");
+            }
+
+            if (status === "In Progress") {
+                document.getElementById("step1").classList.add("completed");
+                document.getElementById("step2").classList.add("completed");
+                document.getElementById("step3").classList.add("active");
+            }
+
+            if (status === "Resolved") {
+                steps.forEach(id => {
+                    document.getElementById(id).classList.add("completed");
+                });
+            }
+
+        }
+
     </script>
 
 </body>

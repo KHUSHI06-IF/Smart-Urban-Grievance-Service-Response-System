@@ -30,7 +30,9 @@
             <h3 class="register-heading">Create Citizen Account</h3>
             <p class="login-subtitle">Join the platform to access city services faster</p>
 
-            <form onsubmit="handleRegister(event)">
+            <!-- IMPORTANT: Removed onsubmit -->
+            <form id="registerForm">
+
                 <div class="form-grid">
                     <div class="form-group">
                         <label>First Name</label>
@@ -44,7 +46,7 @@
 
                 <div class="form-group">
                     <label>Email Address</label>
-                    <input type="email" id="regEmail" placeholder="john@example.com" required>
+                    <input type="email" id="email" placeholder="john@example.com" required>
                 </div>
 
                 <div class="form-group">
@@ -64,8 +66,9 @@
                 </div>
 
                 <div class="terms-box">
-                    By clicking "Register Account", you agree to our <a href="#">Terms of Service</a> and <a
-                        href="#">Privacy Policy</a> regarding your urban data usage.
+                    By clicking "Register Account", you agree to our
+                    <a href="#">Terms of Service</a> and
+                    <a href="#">Privacy Policy</a>.
                 </div>
 
                 <p id="regMsg" style="color: #00e5ff; font-size: 14px; margin-bottom: 10px;"></p>
@@ -86,31 +89,72 @@
 
     </div>
 
-    <script>
-        function handleRegister(e) {
+    <!-- Firebase Module Script -->
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyC02P5v3WFqueR7qpwxA3cxEKVsUqQpycs",
+            authDomain: "smart-grievance-project.firebaseapp.com",
+            projectId: "smart-grievance-project",
+            storageBucket: "smart-grievance-project.appspot.com",
+            messagingSenderId: "351881017713",
+            appId: "1:351881017713:web:e0deca315c159579481ed0",
+            measurementId: "G-3M2YY17X7P"
+        };
+
+        // Init Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Registration Handler
+        document.getElementById("registerForm").addEventListener("submit", function (e) {
             e.preventDefault();
-            let email = document.getElementById("regEmail").value;
-            let pass = document.getElementById("regPass").value;
-            let passConf = document.getElementById("regPassConf").value;
 
-            if (pass !== passConf) {
-                document.getElementById("regMsg").innerText = "⚠️ Passwords do not match!";
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("regPass").value;
+            const confirmPassword = document.getElementById("regPassConf").value;
+            const message = document.getElementById("regMsg");
+
+            const firstName = document.getElementById("regFirstName").value;
+            const lastName = document.getElementById("regLastName").value;
+            const phone = document.getElementById("regPhone").value;
+
+            if (password !== confirmPassword) {
+                message.innerText = "⚠️ Passwords do not match!";
                 return;
             }
 
-            let storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(async (userCredential) => {
+                    const user = userCredential.user;
 
-            if (storedUsers.find(u => u.username === email)) {
-                document.getElementById("regMsg").innerText = "⚠️ Account already exists!";
-                return;
-            }
+                    // Save additional data to Firestore
+                    await setDoc(doc(db, "users", user.uid), {
+                        firstName: firstName,
+                        lastName: lastName,
+                        name: firstName + " " + lastName,
+                        phone: phone,
+                        email: email
+                    });
 
-            storedUsers.push({ username: email, password: pass });
-            localStorage.setItem("users", JSON.stringify(storedUsers));
-            document.getElementById("regMsg").innerText = "✅ Registration successful! Redirecting...";
+                    message.innerText = "✅ Registration successful! Redirecting...";
 
-            setTimeout(() => { window.location.href = "login.html"; }, 1500);
-        }
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 1500);
+                })
+                .catch((error) => {
+                    message.innerText = "❌ " + error.message;
+                });
+        });
+
     </script>
 
 </body>

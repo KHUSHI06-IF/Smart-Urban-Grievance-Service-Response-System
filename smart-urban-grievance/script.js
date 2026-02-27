@@ -1,106 +1,120 @@
-// --- Show Sections ---
-function showSection(section) {
-    document.querySelectorAll("div[id]").forEach(div => div.classList.add("hidden"));
-    document.getElementById(section).classList.remove("hidden");
+let complaints = JSON.parse(localStorage.getItem("complaints")) || [];
+
+
+// ========= SECTION SWITCH =========
+function show(id) {
+    document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden");
+
+    if (id === "list") renderComplaints();
 }
 
-// --- Logout ---
-function logout() {
-    window.location.href = "login.html";
-}
 
-// --- Complaint Storage ---
-let complaints = JSON.parse(localStorage.getItem("complaints") || "[]");
+// ========= IMAGE PREVIEW =========
+function previewImage(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
 
-// --- Add Complaint ---
-function addComplaint() {
-    let title = document.getElementById("title").value;
-    let desc = document.getElementById("desc").value;
-    let category = document.getElementById("category").value;
-
-    if (!title || !desc) {
-        alert("Please fill all fields!");
-        return;
+    reader.onload = function () {
+        const img = document.getElementById("preview");
+        img.src = reader.result;
+        img.classList.remove("hidden");
     }
 
-    let id = complaints.length + 1;
+    reader.readAsDataURL(file);
+}
 
-    let newComplaint = {
-        id: id,
-        title: title,
-        desc: desc,
-        category: category,
-        status: "Submitted",
-        timeline: [
-            { text: "Complaint Submitted", time: new Date().toLocaleString() }
-        ]
+
+// ========= ADD COMPLAINT =========
+function addComplaint() {
+
+    const id = "CMP" + Math.floor(Math.random() * 10000);
+
+    const complaint = {
+        id,
+        title: title.value,
+        desc: desc.value,
+        address: address.value,
+        image: preview.src || "",
+        status: 0,
+        date: new Date().toLocaleDateString()
     };
 
-    complaints.push(newComplaint);
+    complaints.push(complaint);
+
     localStorage.setItem("complaints", JSON.stringify(complaints));
 
-    alert("Complaint Submitted Successfully! Your ID: " + id);
-    showSection("list");
-    loadComplaints();
+    alert("Complaint Submitted! ID: " + id);
+
+    show("list");
 }
 
-// --- Load Complaints List ---
-function loadComplaints() {
-    let list = document.getElementById("complaintList");
-    list.innerHTML = "";
+
+// ========= RENDER LIST =========
+function renderComplaints() {
+
+    const box = document.getElementById("complaintList");
+    box.innerHTML = "";
+
+    document.getElementById("total").innerText = complaints.length;
 
     complaints.forEach(c => {
-        let box = document.createElement("div");
-        box.className = "p-4 bg-white rounded shadow";
 
-        box.innerHTML = `
-            <h3 class="font-bold text-lg">${c.title}</h3>
-            <p>${c.desc}</p>
-            <p class="text-sm text-gray-500">Category: ${c.category}</p>
-            <p class="text-sm font-bold mt-2">Status: ${c.status}</p>
-            <button onclick="trackFromList(${c.id})"
-                class="mt-3 bg-green-600 text-white px-4 py-1 rounded">
-                Track
-            </button>
-        `;
+        box.innerHTML += `
+      <div class="bg-white p-4 rounded shadow flex justify-between items-center">
 
-        list.appendChild(box);
+        <div>
+          <h3 class="font-bold">${c.title}</h3>
+          <p>${c.id}</p>
+          <p class="text-sm text-gray-500">${c.date}</p>
+        </div>
+
+        <button onclick="track('${c.id}')" 
+          class="bg-blue-500 text-white px-4 py-1 rounded">
+          Track
+        </button>
+      </div>
+    `;
     });
-
-    document.getElementById("totalCount").innerText = complaints.length;
 }
 
-loadComplaints();
 
-// --- Track Complaint from List ---
-function trackFromList(id) {
-    showSection("track");
-    document.getElementById("trackID").value = id;
-    trackComplaint();
-}
+// ========= TRACKING =========
+function track(id) {
 
-// --- Track Complaint ---
-function trackComplaint() {
-    let id = document.getElementById("trackID").value;
-    let comp = complaints.find(c => c.id == id);
+    show("track");
 
-    let timeline = document.getElementById("timeline");
-    timeline.innerHTML = "";
+    const c = complaints.find(x => x.id === id);
 
-    if (!comp) {
-        timeline.innerHTML = `<p class="text-red-600 font-bold">Complaint Not Found!</p>`;
-        return;
-    }
+    const steps = [
+        "Submitted",
+        "Assigned",
+        "In Progress",
+        "Inspection",
+        "Resolved"
+    ];
 
-    comp.timeline.forEach(t => {
-        let step = document.createElement("div");
-        step.className = "bg-blue-100 p-4 rounded shadow w-56 text-center";
+    let timeline = "";
 
-        step.innerHTML = `
-            <h3 class="font-bold">${t.text}</h3>
-            <p class="text-sm text-gray-600">${t.time}</p>
-        `;
-
-        timeline.appendChild(step);
+    steps.forEach((s, i) => {
+        timeline += `
+      <div class="flex flex-col items-center">
+        <div class="w-6 h-6 rounded-full ${i <= c.status ? 'bg-green-500' : 'bg-gray-300'}"></div>
+        <p class="text-sm">${s}</p>
+      </div>
+    `;
     });
+
+    document.getElementById("trackBox").innerHTML = `
+    <h3 class="font-bold mb-4">${c.title} (${c.id})</h3>
+
+    ${c.image ? `<img src="${c.image}" class="w-40 mb-4 rounded">` : ""}
+
+    <p class="mb-4">${c.desc}</p>
+    <p class="mb-4 text-gray-600">Address: ${c.address}</p>
+
+    <div class="flex justify-between mt-6">
+      ${timeline}
+    </div>
+  `;
 }
